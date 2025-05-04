@@ -191,4 +191,84 @@ class Database
             'secondHandPercentage' => $secondHandPercentage,
         ];
     }
+
+    public function dataPerDublinDistrict(): array
+    {
+        $query = <<<SQL
+        SELECT DISTINCT SUBSTR(p.eircode, 0, 4) as district,
+                ROUND(AVG(p.price), 2) as avg_price,
+                COUNT(p.id) as sales,
+                ROUND(100.0 * COUNT(CASE WHEN p.type = 'new' THEN 1 END) / COUNT(*), 2) AS new_percentage
+        FROM property p
+        WHERE SUBSTR(p.eircode, 1, 3) BETWEEN 'D01' AND 'D24' AND p.date_y > 2020
+        GROUP BY district
+        ORDER BY district;
+        SQL;
+
+        $districts = [];
+        $avgPrices = [];
+        $sales = [];
+        $newPercentage = [];
+        $secondHandPercentage = [];
+
+        $result = $this->connection->query($query);
+        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+            $districts[] = $row['district'];
+            $avgPrices[] = (float)$row['avg_price'];
+            $sales[] = (int)$row['sales'];
+            $newPercentage[] = (float)$row['new_percentage'];
+            $secondHandPercentage[] = 100-(float)$row['new_percentage'];
+        }
+
+        return [
+            'districts' => $districts,
+            'avg_prices' => $avgPrices,
+            'sales' => $sales,
+            'newPercentage' => $newPercentage,
+            'secondHandPercentage' => $secondHandPercentage,
+        ];
+    }
+
+    public function dataPerDublinSide(): array
+    {
+        $query = <<<SQL
+        SELECT CASE WHEN SUBSTR(p.eircode, 1, 3) BETWEEN 'D01' AND 'D06' THEN 'center'
+                    WHEN CAST(SUBSTR(p.eircode, 3, 1) AS INT) % 2 = 0 THEN 'south'
+                    ELSE 'north' END as side,
+                ROUND(AVG(p.price), 2) as avg_price,
+                COUNT(p.id) as sales,
+                ROUND(100.0 * COUNT(CASE WHEN p.type = 'new' THEN 1 END) / COUNT(*), 2) AS new_percentage
+        FROM property p
+        WHERE SUBSTR(p.eircode, 1, 3) BETWEEN 'D01' AND 'D24' AND p.date_y > 2020
+        GROUP BY side
+        ORDER BY CASE side
+            WHEN 'north' THEN 1
+            WHEN 'center' THEN 2
+            ELSE 3
+        END;;
+        SQL;
+
+        $sides = [];
+        $avgPrices = [];
+        $sales = [];
+        $newPercentage = [];
+        $secondHandPercentage = [];
+
+        $result = $this->connection->query($query);
+        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+            $sides[] = $row['side'];
+            $avgPrices[] = (float)$row['avg_price'];
+            $sales[] = (int)$row['sales'];
+            $newPercentage[] = (float)$row['new_percentage'];
+            $secondHandPercentage[] = 100-(float)$row['new_percentage'];
+        }
+
+        return [
+            'sides' => $sides,
+            'avg_prices' => $avgPrices,
+            'sales' => $sales,
+            'newPercentage' => $newPercentage,
+            'secondHandPercentage' => $secondHandPercentage,
+        ];
+    }
 }

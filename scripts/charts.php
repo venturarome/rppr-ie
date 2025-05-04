@@ -7,6 +7,8 @@ $dataPerYear = $db->dataPerYear();
 $dataPerCounty = $db->dataPerCounty();
 $dataPerYearAndCounty = $db->dataPerYearAndCounty();
 $dataPerMonth = $db->dataPerMonth();
+$dataPerDublinSide = $db->dataPerDublinSide();
+$dataPerDublinDistrict = $db->dataPerDublinDistrict();
 
 ?>
 
@@ -65,6 +67,18 @@ $dataPerMonth = $db->dataPerMonth();
         <div class="col-md-6">
             <div class="card shadow-sm p-3"><canvas id="seasonalityChart"></canvas></div>
         </div>
+
+        <div class="col-md-12"><br></div>
+
+        <div class="col-md-12" style="text-align: center;">
+            <h2>Dublin City Market</h2>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm p-3"><canvas id="dublinSidesChart"></canvas></div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm p-3"><canvas id="dublinDistrictsChart"></canvas></div>
+        </div>
     </div>
 </div>
 
@@ -85,6 +99,14 @@ $dataPerMonth = $db->dataPerMonth();
     const months = <?= json_encode($dataPerMonth['months']) ?>;
     const avgPricesPerMonth = <?= json_encode($dataPerMonth['avg_prices']) ?>;
     const salesPerMonth = <?= json_encode($dataPerMonth['sales']) ?>;
+
+    const dublinSides = <?= json_encode($dataPerDublinSide['sides']) ?>;
+    const avgPricesPerDublinSide = <?= json_encode($dataPerDublinSide['avg_prices']) ?>;
+    const salesPerDublinSide = <?= json_encode($dataPerDublinSide['sales']) ?>;
+
+    const dublinDistricts = <?= json_encode($dataPerDublinDistrict['districts']) ?>;
+    const avgPricesPerDublinDistrict = <?= json_encode($dataPerDublinDistrict['avg_prices']) ?>;
+    const salesPerDublinDistrict = <?= json_encode($dataPerDublinDistrict['sales']) ?>;
 
     ///////////////////////
     // LINE GRAPHS
@@ -378,6 +400,125 @@ $dataPerMonth = $db->dataPerMonth();
                     ticks: {
                         autoSkip: false, // Ensures no labels are skipped
                         maxTicksLimit: months // Ensures all labels are shown
+                    }
+                },
+                ySales: {
+                    type: 'linear',
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Sales Count'
+                    }
+                },
+                yAvgPrices: {
+                    type: 'linear',
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Average Price (€)'
+                    },
+                    grid: {
+                        drawOnChartArea: false // Don't show overlapping grid
+                    }
+                }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('dublinSidesChart'), {
+        data: {
+            labels: dublinSides,
+            datasets: [{
+                label: 'Sales per Dublin sides',
+                type: 'line',
+                yAxisID: 'ySales',
+                data: salesPerDublinSide,
+                borderColor: 'blue',
+                backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                fill: false,
+                tension: 0.1
+            }, {
+                label: 'Average prices per Dublin sides',
+                type: 'bar',
+                yAxisID: 'yAvgPrices',
+                data: avgPricesPerDublinSide,
+                backgroundColor: 'green'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Dublin sales and prices (2021-2025) by side'
+                },
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        autoSkip: false, // Ensures no labels are skipped
+                        maxTicksLimit: months // Ensures all labels are shown
+                    }
+                },
+                ySales: {
+                    type: 'linear',
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Sales Count'
+                    },
+                    beginAtZero: true,
+                },
+                yAvgPrices: {
+                    type: 'linear',
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Average Price (€)'
+                    },
+                    grid: {
+                        drawOnChartArea: false // Don't show overlapping grid
+                    }
+                }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('dublinDistrictsChart'), {
+        data: {
+            labels: dublinDistricts,
+            datasets: [{
+                label: 'Sales per Dublin district',
+                type: 'line',
+                yAxisID: 'ySales',
+                data: salesPerDublinDistrict,
+                borderColor: 'blue',
+                backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                fill: false,
+                tension: 0.1
+            }, {
+                label: 'Average prices per Dublin district',
+                type: 'bar',
+                yAxisID: 'yAvgPrices',
+                data: avgPricesPerDublinDistrict,
+                backgroundColor: 'green'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Dublin districts sales and prices (2021-2025)'
+                },
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        autoSkip: false, // Ensures no labels are skipped
+                        maxTicksLimit: months, // Ensures all labels are shown
+                        minRotation: 45,
+                        maxRotation: 45,
                     }
                 },
                 ySales: {
